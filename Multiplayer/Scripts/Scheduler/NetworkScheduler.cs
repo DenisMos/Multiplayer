@@ -1,5 +1,4 @@
 ﻿using Assets.Module.Multiplayer.Scripts.Scheduler;
-using Assets.Multiplayer.Framework;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
 using System;
 using System.Collections.Generic;
@@ -29,12 +28,10 @@ namespace Assets.Multiplayer.Scheduler
 		private object _sync = new object();
 
 		public NetworkScheduler(
-			bool isServer,
 			SynchronizationContext synchronizationContext,
 			IIPEndPointClient iPEndPointClient,
 			INetworkService updInstance)
 		{
-			IsServer = isServer;
 			Context = synchronizationContext;
 			UpdInstance = updInstance;
 			ClientTable = iPEndPointClient;
@@ -151,21 +148,12 @@ namespace Assets.Multiplayer.Scheduler
 			}, null);
 		}
 
-		//public void Post(Func<byte[]> func, FieldData field, EndPoint sender)
-		//{
-		//	lock(_sync)
-		//	{
-		//		if(field == null) return;
-
-		//		var data = func.Invoke();
-
-		//		if(IsServer)
-		//		{
-		//			Resolve(ignorableUser: sender);
-		//		}
-
-		//		//CacheFields[field] = data;
-		//	}
-		//}
+		public void Close()
+		{
+			lock(_sync)
+			{
+				Actions.Clear();
+			}
+		}
 	}
 }

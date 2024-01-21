@@ -39,7 +39,7 @@ namespace Multiplayer.Scripts.Services.Auth
 					{
 						if(verb)
 						{
-							Debug.Log($"{responseData.EndPoint} - connected");
+							NetworkLogger.Log($"{responseData.EndPoint} - connected");
 						}
 					}
 					var startProto = new RPEProtocol(RPECommandData.Start);
@@ -51,7 +51,7 @@ namespace Multiplayer.Scripts.Services.Auth
 					{
 						if(verb)
 						{
-							Debug.Log($"{responseData.EndPoint} - disconnected");
+							NetworkLogger.Log($"{responseData.EndPoint} - disconnected");
 						}
 					}
 					break;
@@ -59,13 +59,15 @@ namespace Multiplayer.Scripts.Services.Auth
 					_isConnections = true;
 					break;
 				default:
-					Debug.Log(rPECommandData);
+					NetworkLogger.Log(rPECommandData);
 					break;
 			}
 		}
 
 		public bool TryConnect(string ip, int port)
 		{
+			NetworkLogger.Log($"Try connect: '{ip}:{port}'");
+
 			var address = new IPEndPoint(IPAddress.Parse(ip), port);
 			try
 			{
@@ -84,6 +86,8 @@ namespace Multiplayer.Scripts.Services.Auth
 							startProto.SendTo((UpdInstance)_updInstance, address);
 
 							Thread.Sleep(500);
+
+							NetworkLogger.Log($"reconnect: '{ip}:{port}'");
 						}
 						while(!_isConnections);
 					}, cancel.Token);
@@ -92,7 +96,7 @@ namespace Multiplayer.Scripts.Services.Auth
 
 					if(task.Status == TaskStatus.Canceled)
 					{
-						Debug.LogError("Сервер не найден!");
+						NetworkLogger.LogError("Сервер не найден!");
 						return false;
 					}
 					else
@@ -105,7 +109,7 @@ namespace Multiplayer.Scripts.Services.Auth
 			}
 			catch
 			{
-				Debug.LogError("Сервер не найден!");
+				NetworkLogger.LogError("Сервер не найден!");
 				return false;
 			}
 		}

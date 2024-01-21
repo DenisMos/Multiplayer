@@ -41,8 +41,6 @@ namespace Assets.Multiplayer.Attributes
 			{ 
 				Token = guid;
 			}
-
-			UnityEngine.Debug.Log($"{Token}:{Name}-{isStatic}");
 		}
 
 		public RPCMethodsAttribute(NetworkMethodsProto netOptEnums)

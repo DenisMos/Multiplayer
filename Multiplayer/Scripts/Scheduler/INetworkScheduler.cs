@@ -19,6 +19,8 @@ namespace Assets.Multiplayer.Scheduler
 		/// <summary>Вызывает изменения в планировщике.</summary>
 		//public void Post(Func<byte[]> func, FieldData field, EndPoint endPoint);
 
+		public void Close();
+
 		public void Post(byte[] data);
 
 		public void Post(QueueItemNet queueItemNet);

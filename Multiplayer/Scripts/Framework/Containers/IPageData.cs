@@ -12,31 +12,6 @@ namespace UdpServerCore.Framework
 		Guid Token { get; }
 
 		List<TFields> Fields { get; }
-
-		void Set(long id, object obj, object val);
-	}
-
-	public sealed class PageData : IPageData<FieldData>
-	{
-		public Guid Token { get; }
-
-		public List<FieldData> Fields { get; set; }
-
-		public PageData(Guid token, int capacity)
-		{
-			Token = token;
-			Fields = new List<FieldData>(capacity);
-		}
-
-		public void Set(long id, object obj, object val)
-		{
-			var da = Fields.FirstOrDefault(x=>x.Id == id);
-
-			if(da != null)
-			{ 
-				da.Value.SetValue(obj, val);
-			}
-		}
 	}
 
 	public class FieldData

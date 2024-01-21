@@ -4,20 +4,24 @@ using System;
 using UdpServerCore.Core;
 using UdpServerCore.Framework;
 using UdpServerCore.Protocols;
+using UdpServerCore.Servers;
 
 namespace Multiplayer.Scripts.Handlers
 {
 	public sealed class SendAPI : INetService<RPCProtoData>
 	{
-		private INetworkService _updInstance;
+		private INetworkService _udpInstance;
 		private IIPEndPointClient _iPEndPointClient;
+		private SyncHandler _syncHandler;
 
 		public SendAPI(
-			INetworkService updInstance,
-			IIPEndPointClient iPEndPointClient) 
+			INetworkService udpInstance,
+			IIPEndPointClient iPEndPointClient,
+			SyncHandler syncHandler) 
 		{
-			_updInstance = updInstance;
+			_udpInstance = udpInstance;
 			_iPEndPointClient= iPEndPointClient;
+			_syncHandler = syncHandler;
 		}
 
 		public void SendBytes(Func<IProtocol> func)
@@ -25,7 +29,7 @@ namespace Multiplayer.Scripts.Handlers
 			var proto = func.Invoke();
 			foreach(var client in _iPEndPointClient.EndPoints)
 			{
-				proto.SendTo(_updInstance, client);
+				proto.SendTo(_udpInstance, client);
 			}
 		}
 
@@ -37,7 +41,7 @@ namespace Multiplayer.Scripts.Handlers
 					.Add(rPCProtoData.Args[0].ToString(), rPCProtoData.Sender);
 			}
 
-			UnityEngine.Debug.Log(rPCProtoData.Name);
+			NetworkLogger.Log(rPCProtoData.Name);
 		}
 
 		public void CallResponse(ResponseData responseData, RPCProtoData data, bool verb)

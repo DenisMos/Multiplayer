@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using Assets.Multiplayer.Scripts.Extansions;
 using UdpServerCore.Protocols;
 using Assets.Module.Multiplayer.Scripts.Scheduler;
+using Multiplayer;
 
 namespace UdpServerCore.Clients
 {
@@ -30,105 +31,98 @@ namespace UdpServerCore.Clients
 
 		private INetworkScheduler _networkScheduler;
 		private IIPEndPointClient _iPEndPointClient1;
-        private SyncMainContainer _syncMainContainer;
-        private INetworkService _updInstance;
+		private SyncMainContainer _syncMainContainer;
+		private INetworkService _updInstance;
 
-        private Dictionary<FieldData, byte[]> CacheFields = new Dictionary<FieldData, byte[]>();
+		private Dictionary<FieldData, byte[]> CacheFields = new Dictionary<FieldData, byte[]>();
 
-        private Task Task { get; set; }
+		private Task Task { get; set; }
 
 		public SyncFieldSend(
 			INetworkScheduler networkScheduler,
 			IIPEndPointClient iPEndPointClient,
-            SyncMainContainer syncMainContainer,
-            INetworkService updInstance)
+			SyncMainContainer syncMainContainer,
+			INetworkService updInstance)
 		{
 			_networkScheduler = networkScheduler;
-            _iPEndPointClient1 = iPEndPointClient;
-            _syncMainContainer = syncMainContainer;
-            _updInstance = updInstance;
-        }
+			_iPEndPointClient1 = iPEndPointClient;
+			_syncMainContainer = syncMainContainer;
+			_updInstance = updInstance;
+		}
 
 		public void Stop()
 		{
 			Status = false;
 		}
 
-      
-
-        private IProtocol Resolve(EndPoint endPoint)
-        {
-            //if(!_networkScheduler.IsServer) return null;
-
-            foreach(var bhContainer in _syncMainContainer.BehaviorContainers)
-            {
-                if(_networkScheduler.IsServer && _iPEndPointClient1.userTableRule.Rules.ContainsKey(bhContainer.Token.ToString()))
-                    continue;
-
-                if(!_networkScheduler.IsServer && !_iPEndPointClient1.userTableRule.Rules.ContainsKey(bhContainer.Token.ToString()))
-                    continue;
-
-                foreach(var field in bhContainer.Fields)
-                {
-                    if(field.Value == null && field.Id >= 0) continue;
-
-                    try
-                    {
-                        var data = ConvertProtoData.Convert(field, bhContainer, null);
-
-                        if(!EquelsCache(field, data))
-                        {
-                            CacheFields[field] = data;
-
-                            var protocol = field.ToProto(bhContainer.Token, data);
-                            protocol.SendTo(_updInstance, endPoint);
-                        }
-                    }
-                    catch(Exception exc)
-                    {
-                        Debug.LogError(exc);
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private bool EquelsCache(FieldData fieldData, byte[] data)
-        {
-            if(CacheFields.ContainsKey(fieldData))
-            {
-                return CacheFields[fieldData].EqualsArray(data);
-            }
-
-            CacheFields.Add(fieldData, data);
-            return true;
-        }
-
-        public void StartSending()
+		private IProtocol Resolve(EndPoint endPoint)
 		{
-            Task = Task.Run(() =>
-            {
-                Debug.Log("Сервис синхронизации начал работу.");
+			foreach(var bhContainer in _syncMainContainer.BehaviorContainers)
+			{
+				if(_networkScheduler.IsServer && _iPEndPointClient1.userTableRule.Rules.ContainsKey(bhContainer.Token.ToString()))
+					continue;
 
-                _networkScheduler.Post(
-                   new QueueItemNet(
-                      () => {
-                          foreach(var item in _iPEndPointClient1.EndPoints)
-                          {
-                              Resolve(item);
-                          }
-                      }, RulesSending.Cycle, "sendingFields"
-                   )
-                );
+				if(!_networkScheduler.IsServer && !_iPEndPointClient1.userTableRule.Rules.ContainsKey(bhContainer.Token.ToString()))
+					continue;
 
-                while(Status)
+				foreach(var field in bhContainer.Fields)
+				{
+					if(field.Value == null && field.Id >= 0) continue;
+
+					try
+					{
+						var data = ConvertProtoData.Convert(field, bhContainer, null);
+
+						CacheFields[field] = data;
+
+						var protocol = field.ToProto(bhContainer.Token, data);
+						protocol.SendTo(_updInstance, endPoint);
+					}
+					catch(Exception exc)
+					{
+						Debug.LogError(exc);
+					}
+				}
+			}
+
+			return null;
+		}
+
+		private bool EquelsCache(FieldData fieldData, byte[] data)
+		{
+			if(CacheFields.ContainsKey(fieldData))
+			{
+				return CacheFields[fieldData].EqualsArray(data);
+			}
+
+			CacheFields.Add(fieldData, data);
+			return true;
+		}
+
+		public void StartSending()
+		{
+			Task = Task.Run(() =>
+			{
+				NetworkLogger.Log("Сервис синхронизации начал работу.");
+
+				_networkScheduler.Post(
+				   new QueueItemNet(
+					  () => {
+						  foreach(var item in _iPEndPointClient1.EndPoints.ToArray())
+						  {
+							  Resolve(item);
+						  }
+					  }, RulesSending.Cycle, "sendingFields"
+				   )
+				);
+
+				while(Status)
 				{
 					_networkScheduler.Resolve();
 					Thread.Sleep(Rate);
 				}
 
-				Debug.Log("Сервис синхронизации прекратил работу.");
+				NetworkLogger.Log("Сервис синхронизации прекратил работу.");
 			});
 		}
 	}

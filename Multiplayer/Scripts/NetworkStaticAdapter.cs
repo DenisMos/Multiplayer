@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Multiplayer;
+using UnityEngine;
 
 namespace Assets.Multiplayer.Scripts
 {
@@ -10,7 +11,7 @@ namespace Assets.Multiplayer.Scripts
 		{
 			_networkAdapter = Object.FindObjectOfType<UnityNetworkAdapter>();
 
-			Debug.Log($"ok {_networkAdapter != null}");
+			NetworkLogger.Log($"ok {_networkAdapter != null}");
 		}
 	}
 }

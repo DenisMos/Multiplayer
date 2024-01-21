@@ -101,16 +101,6 @@ namespace Assets.Multiplayer.Framework
 			}
 		}
 
-		public void Set(long id, object obj, object val)
-		{
-			var da = Fields.FirstOrDefault(x => x.Id == id);
-
-			if(da != null)
-			{
-				da.Value.SetValue(NetworkBehaviour, val);
-			}
-		}
-
 		public void Set(FieldData field, object val)
 		{
 			if(field != null)
@@ -119,16 +109,12 @@ namespace Assets.Multiplayer.Framework
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="transformSerialize"></param>
 		public void SetTransform(TransformSerialize transformSerialize)
 		{
 			if(NetworkBehaviour != null)
 			{
-				NetworkBehaviour.transform.position = transformSerialize.Position;
-				NetworkBehaviour.transform.rotation = transformSerialize.Rotation;
+				NetworkBehaviour.transform.position   = transformSerialize.Position;
+				NetworkBehaviour.transform.rotation   = transformSerialize.Rotation;
 				NetworkBehaviour.transform.localScale = transformSerialize.Scale;
 			}
 		}

@@ -3,7 +3,7 @@ using System.Net;
 using System.Linq;
 using System.Net.Sockets;
 
-using UnityEngine;
+using Multiplayer;
 
 namespace UdpServerCore.Core
 {
@@ -54,13 +54,16 @@ namespace UdpServerCore.Core
 
 		private void AsyncResponse(IAsyncResult ar)
 		{
+			if(Disposed) return;
+
 			_result = ar;
 			try
 			{
 				EndPoint endPoint = new IPEndPoint(0, 0);
+
 				int count = _udpSocket.EndReceiveFrom(_result, ref endPoint);
 
-				Debug.Log($"{_buffer[1]} | {endPoint}");
+				NetworkLogger.Log($"{_buffer[1]} | {endPoint}");
 
 				var content = new ResponseData(_buffer.Take(count).ToArray(), endPoint);
 
@@ -68,7 +71,7 @@ namespace UdpServerCore.Core
 			}
 			catch(Exception exp)
 			{
-				Console.WriteLine(exp.Message);
+				NetworkLogger.LogError(exp.Message);
 			}
 			finally
 			{
@@ -76,16 +79,16 @@ namespace UdpServerCore.Core
 				{
 					_udpSocket.BeginReceiveFrom(_buffer, 0, _buffer.Length, SocketFlags.None, ref _endPoint, AsyncResponse, null);
 				}
-            }
+			}
 		}
 
 		public void SendTo(byte[] data, EndPoint endPoint)
 		{
 			try
 			{
-                _udpSocket.SendTo(data, SocketFlags.None, endPoint);
-                Debug.Log($"Send data {data[1]} | {endPoint}");
-            }
+				_udpSocket.SendTo(data, SocketFlags.None, endPoint);
+				NetworkLogger.Log($"Send data {data[1]} | {endPoint}");
+			}
 			catch
 			{
 				throw;

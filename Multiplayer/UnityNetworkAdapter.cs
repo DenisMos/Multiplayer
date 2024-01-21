@@ -1,24 +1,26 @@
 using System;
 using System.Net;
+using System.Threading;
+using System.Collections.Generic;
 
 using UnityEngine;
 
-using UdpServerCore.Clients;
 using UdpServerCore.Core;
-using UdpServerCore.Protocols.RPE;
+using UdpServerCore.Clients;
 using UdpServerCore.Servers;
+using UdpServerCore.Protocols.RPE;
+using UdpServerCore.Framework.ClientList;
 
 using Assets.Multiplayer.Framework;
-using System.Threading;
 using Assets.Multiplayer;
-using System.Collections.Generic;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Containers;
 using Assets.Multiplayer.Scripts.Framework;
-using UdpServerCore.Framework.ClientList;
+
 using Multiplayer.Scripts.Handlers;
 using Multiplayer.Scripts.Services.Auth;
 using Multiplayer.Scripts.Services.Sync;
+using Multiplayer;
 
 /// <summary>Сетевой адаптер сокетов для Unity.</summary>
 public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
@@ -37,7 +39,6 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 	public SyncMainContainer Containers { get; set; }
 
 	private SendAPI SendAPI { get; set; }
-
 
 	[Header("Регистрировать все 'behaviours'")]
 	[SerializeField]
@@ -58,8 +59,16 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 	private int Port;
 	private bool IsClient;
 
+	private void SetLoggerSinks()
+	{
+		SinkLogAdapter.SetSink(x => Debug.Log(x));
+		SinkLogAdapter.SetSinkError(x => Debug.LogError(x));
+	}
+
 	private void Awake()
-	{		
+	{
+		SetLoggerSinks();
+
 		Containers = new SyncMainContainer();
 		RegistrationAllBehaviours();
 		_synchronizationContext = SynchronizationContext.Current.CreateCopy();
@@ -68,7 +77,6 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 		_updInstance = new UpdInstance("new");
 
 		NetworkScheduler = new NetworkScheduler(
-			!IsClient, 
 			_synchronizationContext, 
 			ClientTable, 
 			_updInstance);
@@ -78,15 +86,12 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 		_syncServers = new SyncHandler(
 			_updInstance,
-			_synchronizationContext,
 			Containers,
 			_authService,
 			_syncService,
-			NetworkScheduler,
 			_isDebug);
 
-		SendAPI = new SendAPI(_updInstance, ClientTable);
-
+		SendAPI = new SendAPI(_updInstance, ClientTable, _syncServers);
 		_udpInstanceAdapter = new UdpInstanceAdapter(NetworkScheduler, SendAPI);
 	}
 
@@ -137,7 +142,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 		if(_isDebug)
 		{
-			Debug.Log($"Server started on port: '{port}'");
+			NetworkLogger.Log($"Server started: '{ip}:{port}'");
 		}
 	}
 
@@ -147,7 +152,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 		if(_isDebug)
 		{
-			Debug.Log("Client started");
+			NetworkLogger.Log($"Client started: '{ip}:{port}'");
 		}
 
 		NetworkScheduler.IsServer = false;
@@ -155,7 +160,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 		IP = ipDistance;
 		Port = portDistance;
 
-		var s = _syncServers.TryConnect(ipDistance, portDistance);
+		var s = _authService.TryConnect(ipDistance, portDistance);
 
 		_syncFieldSend = new SyncFieldSend(NetworkScheduler, ClientTable, Containers, _updInstance);
 		_syncFieldSend.Status = true;
@@ -168,12 +173,13 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 	{
 		if(!_disposed)
 		{
-			if(IsClient)
+			if(!NetworkScheduler.IsServer)
 			{
 				var startProto = new RPEProtocol(RPECommandData.Exit);
-				startProto.SendTo((UpdInstance)_updInstance, new IPEndPoint(IPAddress.Parse(IP), Port));
+				startProto.SendTo(_updInstance, new IPEndPoint(IPAddress.Parse(IP), Port));
 			}
 
+			NetworkScheduler.Close();
 			_syncFieldSend?.Stop();
 			_updInstance.Stop();
 			_updInstance.Dispose();
