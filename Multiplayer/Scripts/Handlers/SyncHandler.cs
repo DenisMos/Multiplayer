@@ -19,7 +19,7 @@ using Assets.Multiplayer.Scripts.Framework;
 namespace UpdServerCore.Servers
 {
 	/// <summary>Сервер чтения и прослушивания sync протоколов.</summary>
-	public sealed class SyncServers
+	public sealed class SyncHandler
 	{
 		private const int StdLen = 2048;
 		private IUpdInstance _updInstance;
@@ -31,13 +31,16 @@ namespace UpdServerCore.Servers
 
 		private bool _isConnections;
 
-		public bool IsServer { get; private set; }
+		private IIPEndPointClient iPEndPointClient { get; }
 
-		public SyncServers(
+        public bool IsServer { get; private set; }
+
+		public SyncHandler(
 			IUpdInstance updInstance,
 			SynchronizationContext synchronizationContext,
 			SyncMainContainer syncMainContainer,
-			INetworkScheduler networkScheduler,
+            IIPEndPointClient endPoint,
+            INetworkScheduler networkScheduler,
 
 			bool isDebug = false) 
 		{
@@ -45,8 +48,9 @@ namespace UpdServerCore.Servers
 			_updInstance = updInstance;
 			Containers = syncMainContainer;
 			Context = synchronizationContext;
+            iPEndPointClient = endPoint;
 
-			_isDebug = isDebug;
+            _isDebug = isDebug;
 		}
 
 		public void Initialization(SyncMainContainer container)
@@ -71,6 +75,7 @@ namespace UpdServerCore.Servers
 
 			IsServer = true;
 		}
+
 		public bool TryConnect(string ip, int port)
 		{
 			var address = new IPEndPoint(IPAddress.Parse(ip), port);
@@ -134,7 +139,7 @@ namespace UpdServerCore.Servers
 						var startProto = new RPEProtocol(RPECommandData.Start);
 						startProto.SendTo((UpdInstance)_updInstance, responseData.EndPoint);
 
-						_networkScheduler.Resolve(target: responseData.EndPoint);
+						//_networkScheduler.Resolve(target: responseData.EndPoint); // Получение первичной синхронизации
 
 						break;
 					case RPECommandData.Exit:
@@ -173,31 +178,21 @@ namespace UpdServerCore.Servers
 				{
 					var transformData = TransformSerialize.Deserialize(syncData.FieldData);
 
-					_networkScheduler.Post(() =>
-					{
-						Context.Post(d =>
-						{
-							page.SetTransform(transformData);
-						}, null);
-
-						return syncData.FieldData;
-					}, field, responseData.EndPoint);
+                    Context.Post(d =>
+                    {
+                        page.SetTransform(transformData);
+                    }, null);
 				}
 				else
 				{
 					var val = TypeTable.ConvertDataToObject((byte)syncData.Type, syncData.FieldData);
-
-					_networkScheduler.Post(() =>
-					{
-						page.Set(field, val);
-
-						return syncData.FieldData;
-					}, field, responseData.EndPoint);
+                    page.Set(field, val);
 				}
 			}
 			else if(RPCProto.TryParse(responseData.Data, out RPCProtoData protoData))
 			{
-				FuncHandleApi.Call(protoData);
+				protoData.Sender = responseData.EndPoint;
+                FuncHandleApi.Call(protoData);
 
 				Debug.Log($"{protoData.Name}");
 			}

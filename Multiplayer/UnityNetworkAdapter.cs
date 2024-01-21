@@ -15,20 +15,26 @@ using System.Collections.Generic;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Containers;
 using Assets.Multiplayer.Scripts.Framework;
+using UpdServerCore.Framework.ClientList;
+using Assets.Module.Multiplayer.Scripts.Handlers;
 
 /// <summary>Сетевой адаптер сокетов для Unity.</summary>
 public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 {
 	private bool _disposed;
 	private IUpdInstance _updInstance;
-	private SyncServers _syncServers;
+	private SyncHandler _syncServers;
 	private SyncFieldSend _syncFieldSend;
 	private SynchronizationContext _synchronizationContext;
-	public INetworkScheduler _networkScheduler;
+	public EndPointList ClientTable { get; private set; }
 
-	private MethodsContainer MethodsContainer { get; } = new MethodsContainer();
+	public INetworkScheduler NetworkScheduler { get; private set; }
 
-    public SyncMainContainer Containers { get; set; }
+    private MethodsContainer MethodsContainer { get; } = new MethodsContainer();
+
+	public SyncMainContainer Containers { get; set; }
+
+	private SendAPI SendAPI { get; set; }
 
 
 	[Header("Регистрировать все 'behaviours'")]
@@ -45,27 +51,38 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 	private UdpInstanceAdapter _udpInstanceAdapter;
 
-    private string IP;
+	private string IP;
 	private int Port;
 	private bool IsClient;
 
 	private void Awake()
-	{
+	{		
 		Containers = new SyncMainContainer();
 		RegistrationAllBehaviours();
 		_synchronizationContext = SynchronizationContext.Current.CreateCopy();
 
+		ClientTable = new EndPointList();
 		_updInstance = new UpdInstance("new");
-		_networkScheduler = new NetworkScheduler(!IsClient, Containers, _synchronizationContext, _updInstance);
-		_syncServers = new SyncServers(
+		
+		NetworkScheduler = new NetworkScheduler(
+			!IsClient, 
+			Containers, 
+			_synchronizationContext, 
+			ClientTable, 
+			_updInstance);
+
+		_syncServers = new SyncHandler(
 			_updInstance,
 			_synchronizationContext,
 			Containers,
-			_networkScheduler,
-			_isDebug);
+            ClientTable,
+			NetworkScheduler,
+            _isDebug);
 
-		_udpInstanceAdapter = new UdpInstanceAdapter(_networkScheduler);
-    }
+		SendAPI = new SendAPI(_updInstance, ClientTable);
+
+        _udpInstanceAdapter = new UdpInstanceAdapter(NetworkScheduler, SendAPI);
+	}
 
 	private void RegistrationAllBehaviours()
 	{
@@ -106,11 +123,13 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 	{
 		_syncServers.StartServer(ip, port);
 
-		_syncFieldSend = new SyncFieldSend(_networkScheduler);
+		_syncFieldSend = new SyncFieldSend(NetworkScheduler, ClientTable, Containers, _updInstance);
 		_syncFieldSend.Status = true;
 		_syncFieldSend.StartSending();
 
-		if(_isDebug)
+		NetworkScheduler.IsServer = true;
+
+        if(_isDebug)
 		{
 			Debug.Log($"Server started on port: '{port}'");
 		}
@@ -118,21 +137,21 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 	public bool StartClient(string ip, int port, string ipDistance, int portDistance)
 	{
-        _syncServers.StartClient(port);
+		_syncServers.StartClient(port);
 
 		if(_isDebug)
 		{
 			Debug.Log("Client started");
 		}
 
-		IsClient = true;
+        NetworkScheduler.IsServer = false;
 
-        IP = ipDistance;
+		IP = ipDistance;
 		Port = portDistance;
 
 		var s = _syncServers.TryConnect(ipDistance, portDistance);
 
-		_syncFieldSend = new SyncFieldSend(_networkScheduler);
+		_syncFieldSend = new SyncFieldSend(NetworkScheduler, ClientTable, Containers, _updInstance);
 		_syncFieldSend.Status = true;
 		_syncFieldSend.StartSending();
 

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Module.Multiplayer.Scripts.Framework;
+using Assets.Multiplayer.Scheduler;
+using System.Collections.Generic;
 using System.Net;
 
 namespace UpdServerCore.Framework
@@ -8,6 +10,7 @@ namespace UpdServerCore.Framework
     {
         List<EndPoint> EndPoints { get; }
 
+        UserTableRule userTableRule { get; }
         void AddConnect(EndPoint endPoint);
 
         void Disconnect(EndPoint endPoint);

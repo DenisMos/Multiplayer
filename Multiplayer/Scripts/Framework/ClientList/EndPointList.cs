@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Module.Multiplayer.Scripts.Framework;
+using Assets.Multiplayer.Scheduler;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -7,10 +9,13 @@ namespace UpdServerCore.Framework.ClientList
     public sealed class EndPointList : IIPEndPointClient
     {
         public List<EndPoint> EndPoints { get; }
-     
+
+        public UserTableRule userTableRule { get; }
+
         public EndPointList()
         {
             EndPoints = new List<EndPoint>();
+            userTableRule = new UserTableRule();
         }
 
         public void AddConnect(EndPoint endPoint)

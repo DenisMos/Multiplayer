@@ -23,6 +23,8 @@ namespace Assets.Multiplayer
 			}
 		}
 
+		public Guid Id => new Guid(NetworkId);
+
 		[RPCMethods(NetworkMethodsProto.RPC)]
 		/// <summary>Создаёт объект для всех в сети.</summary>
 		/// <param name="model"></param>

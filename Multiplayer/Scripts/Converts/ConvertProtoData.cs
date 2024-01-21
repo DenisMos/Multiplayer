@@ -27,7 +27,7 @@ namespace Assets.Multiplayer.Scripts.Converts
                     Quaternion rot = default;
                     Vector3 sca = default;
 
-                    context.Send(d =>
+                    if(context == null)
                     {
                         var behaviour = bhContainer.NetworkBehaviour;
                         if(bhContainer.NetworkBehaviour != null)
@@ -36,7 +36,20 @@ namespace Assets.Multiplayer.Scripts.Converts
                             rot = behaviour.transform.rotation;
                             sca = behaviour.transform.localScale;
                         }
-                    }, null);
+                    }
+                    else
+                    {
+                        context.Send(d =>
+                        {
+                            var behaviour = bhContainer.NetworkBehaviour;
+                            if(bhContainer.NetworkBehaviour != null)
+                            {
+                                pos = behaviour.transform.position;
+                                rot = behaviour.transform.rotation;
+                                sca = behaviour.transform.localScale;
+                            }
+                        }, null);
+                    }
 
                     return TransformSerialize.Serialize(pos, rot, sca);
                 case NetworkProto.Sync:

@@ -48,7 +48,7 @@ namespace Assets.Multiplayer
 		{
 			if(NetworkAdapter == null)
 			{
-				throw new Exception("Сетевой адаптер не выьран.");
+				throw new Exception("Сетевой адаптер не выбран.");
 			}
 
 			if(ConfigurationFromFile)
@@ -58,9 +58,9 @@ namespace Assets.Multiplayer
 				{
 					using(var fileStream = File.Create(filename))
 					{
-						var ip = Encoding.Unicode.GetBytes("127.0.0.1\n");
-						var port = Encoding.Unicode.GetBytes("5000\n");
-						var portDist = Encoding.Unicode.GetBytes("5001");
+						var ip = Encoding.Unicode.GetBytes($"{IP}\n");
+						var port = Encoding.Unicode.GetBytes($"{Port}\n");
+						var portDist = Encoding.Unicode.GetBytes($"{PortDistanation}");
 
 						fileStream.Write(ip, 0, ip.Length);
 						fileStream.Write(port, 0, port.Length);

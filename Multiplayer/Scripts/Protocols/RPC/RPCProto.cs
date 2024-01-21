@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Assets.Multiplayer.Framework;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -51,9 +54,25 @@ namespace Assets.Multiplayer.Scripts.Protocols.RPC
                 var name_len = BitConverter.ToInt32(bytes, 2);
                 var name = Encoding.Default.GetString(bytes, 6, (int)name_len);
 
+                var pointer = 6 + (int)name_len;
+
+                var list = new List<object>();
+                while(pointer < bytes.Length)
+                {
+                    var ty = bytes[pointer++];
+                    var len = BitConverter.ToInt32(bytes, pointer);
+                    pointer += 4;
+
+                    byte[] des_data = new byte[len];
+                    Array.Copy(bytes,pointer, des_data, 0, len);
+                    var data = TypeTable.ConvertDataToObject(ty, des_data);
+                    list.Add(data);
+                    pointer += len;
+                }
                 protoData = new RPCProtoData(bytes)
                 {
                     Name = name,
+                    Args = list.ToArray(),
                 };
 
                 return true;
