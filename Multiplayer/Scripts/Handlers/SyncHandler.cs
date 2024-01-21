@@ -14,6 +14,7 @@ using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
 using Assets.Multiplayer.Scripts.Framework;
 using Multiplayer.Scripts.Services.Auth;
+using Multiplayer.Scripts.Services.Sync;
 
 namespace UdpServerCore.Servers
 {
@@ -27,12 +28,11 @@ namespace UdpServerCore.Servers
 
 		private AuthService AuthService { get; }
 
+		private SyncService SyncService { get; }
+
 		private SynchronizationContext Context { get; }
+
 		public SyncMainContainer Containers { get; private set; }
-
-		private bool _isConnections;
-
-		private IIPEndPointClient iPEndPointClient { get; }
 
 		public bool IsServer { get; private set; }
 
@@ -41,6 +41,7 @@ namespace UdpServerCore.Servers
 			SynchronizationContext synchronizationContext,
 			SyncMainContainer syncMainContainer,
 			AuthService authService,
+			SyncService syncService,
 			INetworkScheduler networkScheduler,
 
 			bool isDebug = false) 
@@ -50,6 +51,7 @@ namespace UdpServerCore.Servers
 			Containers = syncMainContainer;
 			Context = synchronizationContext;
 			AuthService = authService;
+			SyncService = syncService;
 
 			_isDebug = isDebug;
 		}
@@ -84,33 +86,7 @@ namespace UdpServerCore.Servers
 			}
 			else if(SyncProtocol.TryParse(responseData.Data, out ISyncData syncData))
 			{
-				if(IsServer && !_networkScheduler.Check(responseData.EndPoint))
-				{
-					return;
-				}
-
-				var page = Containers.BehaviorContainers.FirstOrDefault(x => x.Token == syncData.TokenSync);
-				if(page == null)
-				{
-					return;
-				}
-
-				var field = page.Fields.FirstOrDefault(x => x.Id == syncData.FieldId);
-
-				if((byte)syncData.Type == TypeTable.TransformTypeByte)
-				{
-					var transformData = TransformSerialize.Deserialize(syncData.FieldData);
-
-					Context.Post(d =>
-					{
-						page.SetTransform(transformData);
-					}, null);
-				}
-				else
-				{
-					var val = TypeTable.ConvertDataToObject((byte)syncData.Type, syncData.FieldData);
-					page.Set(field, val);
-				}
+				SyncService.CallResponse(responseData, syncData);
 			}
 			else if(RPCProto.TryParse(responseData.Data, out RPCProtoData protoData))
 			{

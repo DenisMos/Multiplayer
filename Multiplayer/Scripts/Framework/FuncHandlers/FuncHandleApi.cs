@@ -69,12 +69,12 @@ namespace Assets.Multiplayer.Scripts.Framework
 
 			var data = Serialize(name, args);
 
-            _scheduler.Post(new QueueItemNet(
-                    () => SendServer.SendBytes(() => new RPCProto(data)),
-                    RulesSending.Timeout,
-                    name
-                ));
-        }
+			_scheduler.Post(new QueueItemNet(
+					() => SendServer.SendBytes(() => new RPCProto(data)),
+					RulesSending.Timeout,
+					name
+				));
+		}
 
 		public static void Call(RPCProtoData rPCProtoData)
 		{
@@ -90,8 +90,8 @@ namespace Assets.Multiplayer.Scripts.Framework
 			}
 			else
 			{
-                SendServer.Call(rPCProtoData);
-            }
+				SendServer.Call(rPCProtoData);
+			}
 		}
 	}
 }

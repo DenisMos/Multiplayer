@@ -15,19 +15,15 @@ namespace Multiplayer.Scripts.Services.Sync
 {
 	public sealed class SyncService : INetService<ISyncData>
 	{
-		private bool IsServer { get; }
-
 		private readonly INetworkScheduler _networkScheduler;
 		private readonly SyncMainContainer Containers;
 
 		public SyncService(
 			INetworkScheduler networkScheduler, 
-			SyncMainContainer containers,
-			bool isServer) 
+			SyncMainContainer containers) 
 		{
 			_networkScheduler = networkScheduler;
 			Containers = containers;
-			IsServer = isServer;
 		}
 
 		public void CallResponse(
@@ -35,7 +31,7 @@ namespace Multiplayer.Scripts.Services.Sync
 			ISyncData syncData, 
 			bool verb = false)
 		{
-			if(IsServer && !_networkScheduler.Check(responseData.EndPoint))
+			if(_networkScheduler.IsServer && !_networkScheduler.Check(responseData.EndPoint))
 			{
 				return;
 			}

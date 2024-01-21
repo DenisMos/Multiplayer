@@ -1,4 +1,5 @@
-﻿using Assets.Multiplayer.Scripts.Protocols.RPC;
+﻿using Assets.Module.Multiplayer.Scripts.Services;
+using Assets.Multiplayer.Scripts.Protocols.RPC;
 using System;
 using UdpServerCore.Core;
 using UdpServerCore.Framework;
@@ -6,7 +7,7 @@ using UdpServerCore.Protocols;
 
 namespace Multiplayer.Scripts.Handlers
 {
-	public sealed class SendAPI
+	public sealed class SendAPI : INetService<RPCProtoData>
 	{
 		private INetworkService _updInstance;
 		private IIPEndPointClient _iPEndPointClient;
@@ -37,6 +38,11 @@ namespace Multiplayer.Scripts.Handlers
 			}
 
 			UnityEngine.Debug.Log(rPCProtoData.Name);
+		}
+
+		public void CallResponse(ResponseData responseData, RPCProtoData data, bool verb)
+		{
+			Call(data);
 		}
 	}
 }
