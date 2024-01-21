@@ -1,6 +1,6 @@
 ﻿using System;
-using UpdServerCore.Framework;
-using UpdServerCore.Protocols.Sync;
+using UdpServerCore.Framework;
+using UdpServerCore.Protocols.Sync;
 
 namespace Assets.Multiplayer.Scripts.Converts
 {

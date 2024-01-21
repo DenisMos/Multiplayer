@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using UpdServerCore.Core;
-using UpdServerCore.Framework;
-using UpdServerCore.Protocols;
+using UdpServerCore.Core;
+using UdpServerCore.Framework;
+using UdpServerCore.Protocols;
 
 namespace Assets.Multiplayer.Scheduler
 {

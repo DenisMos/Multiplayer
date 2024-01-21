@@ -9,8 +9,8 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using UnityEngine;
-using UpdServerCore.Core;
-using UpdServerCore.Framework;
+using UdpServerCore.Core;
+using UdpServerCore.Framework;
 
 namespace Assets.Multiplayer.Scheduler
 {
@@ -30,7 +30,7 @@ namespace Assets.Multiplayer.Scheduler
 
 		private SynchronizationContext Context { get; }
 
-		private IUpdInstance UpdInstance { get; }
+		private INetworkService UpdInstance { get; }
 
 
 		private object _sync = new object();
@@ -40,7 +40,7 @@ namespace Assets.Multiplayer.Scheduler
 			SyncMainContainer syncMainContainer,
 			SynchronizationContext synchronizationContext,
 			IIPEndPointClient iPEndPointClient,
-			IUpdInstance updInstance)
+			INetworkService updInstance)
 		{
 			IsServer = isServer;
 			SyncMainContainer = syncMainContainer;

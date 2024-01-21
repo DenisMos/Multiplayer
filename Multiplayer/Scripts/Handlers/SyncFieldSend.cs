@@ -4,10 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using UnityEngine;
-using UpdServerCore.Core;
-using UpdServerCore.Protocols.Sync;
-using UpdServerCore.Servers;
-using UpdServerCore.Framework;
+using UdpServerCore.Core;
+using UdpServerCore.Protocols.Sync;
+using UdpServerCore.Servers;
+using UdpServerCore.Framework;
 
 using Assets.Multiplayer.Serilizator;
 using Assets.Multiplayer.Attributes;
@@ -16,10 +16,10 @@ using Assets.Multiplayer.Scripts.Converts;
 using System.Net;
 using System.Collections.Generic;
 using Assets.Multiplayer.Scripts.Extansions;
-using UpdServerCore.Protocols;
+using UdpServerCore.Protocols;
 using Assets.Module.Multiplayer.Scripts.Scheduler;
 
-namespace UpdServerCore.Clients
+namespace UdpServerCore.Clients
 {
 	/// <summary>Рассылка протоколов.</summary>
 	public sealed class SyncFieldSend
@@ -31,7 +31,7 @@ namespace UpdServerCore.Clients
 		private INetworkScheduler _networkScheduler;
 		private IIPEndPointClient _iPEndPointClient1;
         private SyncMainContainer _syncMainContainer;
-        private IUpdInstance _updInstance;
+        private INetworkService _updInstance;
 
         private Dictionary<FieldData, byte[]> CacheFields = new Dictionary<FieldData, byte[]>();
 
@@ -41,7 +41,7 @@ namespace UpdServerCore.Clients
 			INetworkScheduler networkScheduler,
 			IIPEndPointClient iPEndPointClient,
             SyncMainContainer syncMainContainer,
-            IUpdInstance updInstance)
+            INetworkService updInstance)
 		{
 			_networkScheduler = networkScheduler;
             _iPEndPointClient1 = iPEndPointClient;

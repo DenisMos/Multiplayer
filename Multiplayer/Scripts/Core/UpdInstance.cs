@@ -5,10 +5,10 @@ using System.Net.Sockets;
 
 using UnityEngine;
 
-namespace UpdServerCore.Core
+namespace UdpServerCore.Core
 {
 
-	public class UpdInstance : IUpdInstance, IDisposable
+	public class UpdInstance : INetworkService, IDisposable
 	{
 		private Socket _udpSocket;
 		private EndPoint _endPoint;

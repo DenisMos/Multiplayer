@@ -3,10 +3,10 @@ using System.Net;
 
 using UnityEngine;
 
-using UpdServerCore.Clients;
-using UpdServerCore.Core;
-using UpdServerCore.Protocols.RPE;
-using UpdServerCore.Servers;
+using UdpServerCore.Clients;
+using UdpServerCore.Core;
+using UdpServerCore.Protocols.RPE;
+using UdpServerCore.Servers;
 
 using Assets.Multiplayer.Framework;
 using System.Threading;
@@ -15,14 +15,14 @@ using System.Collections.Generic;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Containers;
 using Assets.Multiplayer.Scripts.Framework;
-using UpdServerCore.Framework.ClientList;
+using UdpServerCore.Framework.ClientList;
 using Assets.Module.Multiplayer.Scripts.Handlers;
 
 /// <summary>Сетевой адаптер сокетов для Unity.</summary>
 public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 {
 	private bool _disposed;
-	private IUpdInstance _updInstance;
+	private INetworkService _updInstance;
 	private SyncHandler _syncServers;
 	private SyncFieldSend _syncFieldSend;
 	private SynchronizationContext _synchronizationContext;
@@ -30,7 +30,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 	public INetworkScheduler NetworkScheduler { get; private set; }
 
-    private MethodsContainer MethodsContainer { get; } = new MethodsContainer();
+	private MethodsContainer MethodsContainer { get; } = new MethodsContainer();
 
 	public SyncMainContainer Containers { get; set; }
 
@@ -75,13 +75,13 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 			_updInstance,
 			_synchronizationContext,
 			Containers,
-            ClientTable,
+			ClientTable,
 			NetworkScheduler,
-            _isDebug);
+			_isDebug);
 
 		SendAPI = new SendAPI(_updInstance, ClientTable);
 
-        _udpInstanceAdapter = new UdpInstanceAdapter(NetworkScheduler, SendAPI);
+		_udpInstanceAdapter = new UdpInstanceAdapter(NetworkScheduler, SendAPI);
 	}
 
 	private void RegistrationAllBehaviours()
@@ -129,7 +129,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 		NetworkScheduler.IsServer = true;
 
-        if(_isDebug)
+		if(_isDebug)
 		{
 			Debug.Log($"Server started on port: '{port}'");
 		}
@@ -144,7 +144,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 			Debug.Log("Client started");
 		}
 
-        NetworkScheduler.IsServer = false;
+		NetworkScheduler.IsServer = false;
 
 		IP = ipDistance;
 		Port = portDistance;

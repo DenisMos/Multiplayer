@@ -1,7 +1,7 @@
 ﻿using Assets.Multiplayer.Attributes;
 using System;
 using System.Collections.Generic;
-using UpdServerCore.Framework;
+using UdpServerCore.Framework;
 
 namespace Assets.Multiplayer.Scripts.Scheduler
 {

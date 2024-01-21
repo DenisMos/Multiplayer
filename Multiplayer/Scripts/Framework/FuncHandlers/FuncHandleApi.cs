@@ -8,8 +8,8 @@ using Assets.Module.Multiplayer.Scripts.Scheduler;
 using Assets.Multiplayer.Framework;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
-using UpdServerCore.Clients;
-using UpdServerCore.Framework;
+using UdpServerCore.Clients;
+using UdpServerCore.Framework;
 
 namespace Assets.Multiplayer.Scripts.Framework
 {

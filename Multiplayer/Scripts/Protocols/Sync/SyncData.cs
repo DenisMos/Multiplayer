@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UpdServerCore.Protocols.Sync
+namespace UdpServerCore.Protocols.Sync
 {
     public sealed class SyncData : ISyncData
     {

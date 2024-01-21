@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace UpdServerCore.Framework
+namespace UdpServerCore.Framework
 {
 	public interface IPageData<TFields>
 	{

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using UpdServerCore.Clients;
-using UpdServerCore.Core;
+using UdpServerCore.Clients;
+using UdpServerCore.Core;
 
 namespace Assets.Multiplayer.Scripts.Framework
 {

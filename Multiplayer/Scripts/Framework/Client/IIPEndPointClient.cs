@@ -3,7 +3,7 @@ using Assets.Multiplayer.Scheduler;
 using System.Collections.Generic;
 using System.Net;
 
-namespace UpdServerCore.Framework
+namespace UdpServerCore.Framework
 {
     /// <summary>Таблица подключённых клиентов.</summary>
     public interface IIPEndPointClient

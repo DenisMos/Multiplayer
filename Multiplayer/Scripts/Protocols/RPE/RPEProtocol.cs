@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using UpdServerCore.Core;
+using UdpServerCore.Core;
 
-namespace UpdServerCore.Protocols.RPE
+namespace UdpServerCore.Protocols.RPE
 {
     public class RPEProtocol : IProtocol
     {
@@ -30,7 +30,7 @@ namespace UpdServerCore.Protocols.RPE
             return buffers;
         }
 
-        public void SendTo(IUpdInstance udpInstance, EndPoint endPoint)
+        public void SendTo(INetworkService udpInstance, EndPoint endPoint)
         {
             var buffers = GetBuffers();
 

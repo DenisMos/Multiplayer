@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 
 using UnityEngine;
-using UpdServerCore.Framework;
+using UdpServerCore.Framework;
 
 namespace Assets.Multiplayer.Framework
 {
@@ -119,6 +119,10 @@ namespace Assets.Multiplayer.Framework
 			}
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="transformSerialize"></param>
 		public void SetTransform(TransformSerialize transformSerialize)
 		{
 			if(NetworkBehaviour != null)

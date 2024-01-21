@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using UpdServerCore.Core;
+using UdpServerCore.Core;
 
-namespace UpdServerCore.Protocols.Sync
+namespace UdpServerCore.Protocols.Sync
 {
     public sealed class SyncProtocol : IProtocol
     {
@@ -28,7 +28,7 @@ namespace UpdServerCore.Protocols.Sync
             Type = type;
         }
 
-        public void SendTo(IUpdInstance updInstance, EndPoint endPoint)
+        public void SendTo(INetworkService updInstance, EndPoint endPoint)
         {
             if(updInstance.Disposed) return;
 

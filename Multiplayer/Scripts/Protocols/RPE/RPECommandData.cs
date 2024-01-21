@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UpdServerCore.Protocols.RPE
+namespace UdpServerCore.Protocols.RPE
 {
     public enum RPECommandData : byte
     {

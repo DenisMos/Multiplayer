@@ -5,9 +5,9 @@ using System.Data;
 using System.IO;
 using System.Net;
 using System.Text;
-using UpdServerCore.Core;
-using UpdServerCore.Protocols;
-using UpdServerCore.Protocols.RPE;
+using UdpServerCore.Core;
+using UdpServerCore.Protocols;
+using UdpServerCore.Protocols.RPE;
 
 namespace Assets.Multiplayer.Scripts.Protocols.RPC
 {
@@ -83,7 +83,7 @@ namespace Assets.Multiplayer.Scripts.Protocols.RPC
             }
         }
 
-        public void SendTo(IUpdInstance udpInstance, EndPoint endPoint)
+        public void SendTo(INetworkService udpInstance, EndPoint endPoint)
         {
             try
             {

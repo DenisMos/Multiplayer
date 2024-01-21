@@ -1,17 +1,17 @@
 ﻿using System.Net;
 
-namespace UpdServerCore.Core
+namespace UdpServerCore.Core
 {
-    public sealed class ResponseData
-    {
-        public byte[] Data { get; }
+	public sealed class ResponseData
+	{
+		public byte[] Data { get; }
 
-        public EndPoint EndPoint { get; }
+		public EndPoint EndPoint { get; }
 
-        public ResponseData(byte[] data, EndPoint endPoint) 
-        { 
-            Data= data;
-            EndPoint = endPoint;
-        }
-    }
+		public ResponseData(byte[] data, EndPoint endPoint) 
+		{ 
+			Data= data;
+			EndPoint = endPoint;
+		}
+	}
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UpdServerCore.Protocols
+namespace UdpServerCore.Protocols
 {
     public interface ISyncData
     {

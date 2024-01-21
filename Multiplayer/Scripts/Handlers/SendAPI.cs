@@ -7,19 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
-using UpdServerCore.Core;
-using UpdServerCore.Framework;
-using UpdServerCore.Protocols;
+using UdpServerCore.Core;
+using UdpServerCore.Framework;
+using UdpServerCore.Protocols;
 
 namespace Assets.Module.Multiplayer.Scripts.Handlers
 {
     public sealed class SendAPI
     {
-        private IUpdInstance _updInstance;
+        private INetworkService _updInstance;
         private IIPEndPointClient _iPEndPointClient;
 
         public SendAPI(
-            IUpdInstance updInstance,
+            INetworkService updInstance,
             IIPEndPointClient iPEndPointClient) 
         {
             _updInstance = updInstance;

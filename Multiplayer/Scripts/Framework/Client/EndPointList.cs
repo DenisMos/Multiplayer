@@ -1,10 +1,9 @@
 ﻿using Assets.Module.Multiplayer.Scripts.Framework;
-using Assets.Multiplayer.Scheduler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace UpdServerCore.Framework.ClientList
+namespace UdpServerCore.Framework.ClientList
 {
     public sealed class EndPointList : IIPEndPointClient
     {

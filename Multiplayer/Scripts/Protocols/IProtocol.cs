@@ -1,14 +1,14 @@
 ﻿using System.Net;
-using UpdServerCore.Core;
+using UdpServerCore.Core;
 
-namespace UpdServerCore.Protocols
+namespace UdpServerCore.Protocols
 {
     public interface IProtocol
     {
         /// <summary>Тип протокола.</summary>
         public byte Proto { get; }
 
-        void SendTo(IUpdInstance udpInstance, EndPoint endPoint);
+        void SendTo(INetworkService udpInstance, EndPoint endPoint);
 
         bool CheckBuffer(byte[] bytes);
 

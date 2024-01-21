@@ -1,10 +1,9 @@
 ﻿using System.Net;
-using UpdServerCore.Core;
-using UpdServerCore.Framework;
-using UpdServerCore.Framework.ClientList;
-using UpdServerCore.Protocols.RPE;
-using UpdServerCore.Protocols.Sync;
-using UpdServerCore.Protocols;
+using UdpServerCore.Core;
+using UdpServerCore.Framework;
+using UdpServerCore.Protocols.RPE;
+using UdpServerCore.Protocols.Sync;
+using UdpServerCore.Protocols;
 using System.Linq;
 using Assets.Multiplayer.Framework;
 using UnityEngine;
@@ -13,16 +12,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
-using System;
 using Assets.Multiplayer.Scripts.Framework;
 
-namespace UpdServerCore.Servers
+namespace UdpServerCore.Servers
 {
 	/// <summary>Сервер чтения и прослушивания sync протоколов.</summary>
 	public sealed class SyncHandler
 	{
 		private const int StdLen = 2048;
-		private IUpdInstance _updInstance;
+		private INetworkService _updInstance;
 		private bool _isDebug;
 		private INetworkScheduler _networkScheduler;
 
@@ -33,14 +31,14 @@ namespace UpdServerCore.Servers
 
 		private IIPEndPointClient iPEndPointClient { get; }
 
-        public bool IsServer { get; private set; }
+		public bool IsServer { get; private set; }
 
 		public SyncHandler(
-			IUpdInstance updInstance,
+			INetworkService updInstance,
 			SynchronizationContext synchronizationContext,
 			SyncMainContainer syncMainContainer,
-            IIPEndPointClient endPoint,
-            INetworkScheduler networkScheduler,
+			IIPEndPointClient endPoint,
+			INetworkScheduler networkScheduler,
 
 			bool isDebug = false) 
 		{
@@ -48,9 +46,9 @@ namespace UpdServerCore.Servers
 			_updInstance = updInstance;
 			Containers = syncMainContainer;
 			Context = synchronizationContext;
-            iPEndPointClient = endPoint;
+			iPEndPointClient = endPoint;
 
-            _isDebug = isDebug;
+			_isDebug = isDebug;
 		}
 
 		public void Initialization(SyncMainContainer container)
@@ -139,8 +137,6 @@ namespace UpdServerCore.Servers
 						var startProto = new RPEProtocol(RPECommandData.Start);
 						startProto.SendTo((UpdInstance)_updInstance, responseData.EndPoint);
 
-						//_networkScheduler.Resolve(target: responseData.EndPoint); // Получение первичной синхронизации
-
 						break;
 					case RPECommandData.Exit:
 						if(_networkScheduler.TryDisconnect(responseData.EndPoint))
@@ -178,21 +174,21 @@ namespace UpdServerCore.Servers
 				{
 					var transformData = TransformSerialize.Deserialize(syncData.FieldData);
 
-                    Context.Post(d =>
-                    {
-                        page.SetTransform(transformData);
-                    }, null);
+					Context.Post(d =>
+					{
+						page.SetTransform(transformData);
+					}, null);
 				}
 				else
 				{
 					var val = TypeTable.ConvertDataToObject((byte)syncData.Type, syncData.FieldData);
-                    page.Set(field, val);
+					page.Set(field, val);
 				}
 			}
 			else if(RPCProto.TryParse(responseData.Data, out RPCProtoData protoData))
 			{
 				protoData.Sender = responseData.EndPoint;
-                FuncHandleApi.Call(protoData);
+				FuncHandleApi.Call(protoData);
 
 				Debug.Log($"{protoData.Name}");
 			}
