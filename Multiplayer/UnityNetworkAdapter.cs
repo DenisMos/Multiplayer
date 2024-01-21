@@ -16,7 +16,8 @@ using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Containers;
 using Assets.Multiplayer.Scripts.Framework;
 using UdpServerCore.Framework.ClientList;
-using Assets.Module.Multiplayer.Scripts.Handlers;
+using Multiplayer.Scripts.Handlers;
+using Multiplayer.Scripts.Services.Auth;
 
 /// <summary>Сетевой адаптер сокетов для Unity.</summary>
 public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
@@ -50,6 +51,7 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 	private bool _isDebug;
 
 	private UdpInstanceAdapter _udpInstanceAdapter;
+	private AuthService _authService;
 
 	private string IP;
 	private int Port;
@@ -63,19 +65,19 @@ public class UnityNetworkAdapter : MonoBehaviour, IDisposable, INetworkAdapter
 
 		ClientTable = new EndPointList();
 		_updInstance = new UpdInstance("new");
-		
+
 		NetworkScheduler = new NetworkScheduler(
 			!IsClient, 
-			Containers, 
 			_synchronizationContext, 
 			ClientTable, 
 			_updInstance);
 
+		_authService = new AuthService(_updInstance, NetworkScheduler);
 		_syncServers = new SyncHandler(
 			_updInstance,
 			_synchronizationContext,
 			Containers,
-			ClientTable,
+			_authService,
 			NetworkScheduler,
 			_isDebug);
 

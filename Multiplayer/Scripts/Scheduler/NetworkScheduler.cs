@@ -1,14 +1,11 @@
 ﻿using Assets.Module.Multiplayer.Scripts.Scheduler;
 using Assets.Multiplayer.Framework;
-using Assets.Multiplayer.Scripts.Converts;
-using Assets.Multiplayer.Scripts.Extansions;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using UnityEngine;
 using UdpServerCore.Core;
 using UdpServerCore.Framework;
 
@@ -23,30 +20,25 @@ namespace Assets.Multiplayer.Scheduler
 		/// <summary>Очередь планировщика.</summary>
 		private Queue<QueueItemNet> Actions { get; } = new Queue<QueueItemNet>();
 
-
 		private Dictionary<EndPoint, NetworkUserRules> NetRules { get; }
-
-		private SyncMainContainer SyncMainContainer { get; }
 
 		private SynchronizationContext Context { get; }
 
 		private INetworkService UpdInstance { get; }
 
-
 		private object _sync = new object();
 
 		public NetworkScheduler(
 			bool isServer,
-			SyncMainContainer syncMainContainer,
 			SynchronizationContext synchronizationContext,
 			IIPEndPointClient iPEndPointClient,
 			INetworkService updInstance)
 		{
 			IsServer = isServer;
-			SyncMainContainer = syncMainContainer;
 			Context = synchronizationContext;
 			UpdInstance = updInstance;
 			ClientTable = iPEndPointClient;
+
 			NetRules = new Dictionary<EndPoint, NetworkUserRules>();
 		}
 
@@ -92,34 +84,6 @@ namespace Assets.Multiplayer.Scheduler
 			}
 		}
 
-		//private void Resolve(EndPoint ip, bool forced)
-		//{
-		//	foreach(var bhContainer in SyncMainContainer.BehaviorContainers)
-		//	{
-		//		foreach(var field in bhContainer.Fields)
-		//		{
-		//			if(field.Value == null && field.Id >= 0) continue;
-
-		//			try
-		//			{
-		//				var data = ConvertProtoData.Convert(field, bhContainer, Context);
-
-		//				if(!EquelsCache(field, data) || forced)
-		//				{
-  //                          CacheFields[field] = data;
-
-  //                          var syncProto = field.ToProto(bhContainer.Token, data);
-		//					syncProto.SendTo(UpdInstance, ip);
-		//				}
-		//			}
-		//			catch(Exception exc)
-		//			{
-		//				Debug.LogError(exc);
-		//			}
-		//		}
-		//	}
-		//}
-
 		[Obsolete]
 		/// <summary>Вызывает попытку разослать всем сообщения.</summary>
 		/// <param name="ignorableUser"></param>
@@ -157,6 +121,14 @@ namespace Assets.Multiplayer.Scheduler
 						Actions.Enqueue(queueItemNet);
 					}
 				}
+			}, null);
+		}
+
+		public void Call(Action action)
+		{
+			Context.Post(x =>
+			{
+				action.Invoke();	
 			}, null);
 		}
 

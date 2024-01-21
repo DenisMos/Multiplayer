@@ -5,10 +5,11 @@ using UdpServerCore.Core;
 using UdpServerCore.Protocols.RPE;
 using UnityEngine;
 using Assets.Multiplayer.Scheduler;
+using Assets.Module.Multiplayer.Scripts.Services;
 
 namespace Multiplayer.Scripts.Services.Auth
 {
-	public sealed class AuthService
+	public sealed class AuthService : INetService<RPECommandData>
 	{
 		private INetworkService _updInstance;
 		private INetworkScheduler _networkScheduler;
@@ -20,6 +21,47 @@ namespace Multiplayer.Scripts.Services.Auth
 		{
 			_networkScheduler = networkScheduler;
 			_updInstance      = networkService;
+		}
+
+		/// <summary>Обрабатывает серверные команды.</summary>
+		/// <param name="responseData"></param>
+		/// <param name="rPECommandData"></param>
+		/// <param name="verb"></param>
+		public void CallResponse(
+			ResponseData responseData, 
+			RPECommandData rPECommandData,
+			bool verb)
+		{
+			switch(rPECommandData)
+			{
+				case RPECommandData.Subsribe:
+					if(_networkScheduler.TryConnect(responseData.EndPoint))
+					{
+						if(verb)
+						{
+							Debug.Log($"{responseData.EndPoint} - connected");
+						}
+					}
+					var startProto = new RPEProtocol(RPECommandData.Start);
+					startProto.SendTo((UpdInstance)_updInstance, responseData.EndPoint);
+
+					break;
+				case RPECommandData.Exit:
+					if(_networkScheduler.TryDisconnect(responseData.EndPoint))
+					{
+						if(verb)
+						{
+							Debug.Log($"{responseData.EndPoint} - disconnected");
+						}
+					}
+					break;
+				case RPECommandData.Start:
+					_isConnections = true;
+					break;
+				default:
+					Debug.Log(rPECommandData);
+					break;
+			}
 		}
 
 		public bool TryConnect(string ip, int port)

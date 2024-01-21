@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Assets.Multiplayer.Scheduler;
 using Assets.Multiplayer.Scripts.Protocols.RPC;
 using Assets.Multiplayer.Scripts.Framework;
+using Multiplayer.Scripts.Services.Auth;
 
 namespace UdpServerCore.Servers
 {
@@ -23,6 +24,8 @@ namespace UdpServerCore.Servers
 		private INetworkService _updInstance;
 		private bool _isDebug;
 		private INetworkScheduler _networkScheduler;
+
+		private AuthService AuthService { get; }
 
 		private SynchronizationContext Context { get; }
 		public SyncMainContainer Containers { get; private set; }
@@ -37,7 +40,7 @@ namespace UdpServerCore.Servers
 			INetworkService updInstance,
 			SynchronizationContext synchronizationContext,
 			SyncMainContainer syncMainContainer,
-			IIPEndPointClient endPoint,
+			AuthService authService,
 			INetworkScheduler networkScheduler,
 
 			bool isDebug = false) 
@@ -46,14 +49,9 @@ namespace UdpServerCore.Servers
 			_updInstance = updInstance;
 			Containers = syncMainContainer;
 			Context = synchronizationContext;
-			iPEndPointClient = endPoint;
+			AuthService = authService;
 
 			_isDebug = isDebug;
-		}
-
-		public void Initialization(SyncMainContainer container)
-		{
-			Containers = container;
 		}
 
 		public void StartClient(int port)
@@ -75,85 +73,14 @@ namespace UdpServerCore.Servers
 		}
 
 		public bool TryConnect(string ip, int port)
-		{
-			var address = new IPEndPoint(IPAddress.Parse(ip), port);
-			try
-			{
-				using(var cancel = new CancellationTokenSource(System.TimeSpan.FromSeconds(15)))
-				{
-					var task = Task.Run(() =>
-					{
-						do
-						{
-							if(cancel.Token.IsCancellationRequested)
-							{
-								cancel.Token.ThrowIfCancellationRequested();
-							}
-
-							var startProto = new RPEProtocol(RPECommandData.Subsribe);
-							startProto.SendTo((UpdInstance)_updInstance, address);
-
-							Thread.Sleep(500);
-						} 
-						while(!_isConnections);
-					}, cancel.Token);
-
-					task.Wait();
-
-					if(task.Status == TaskStatus.Canceled)
-					{
-						Debug.LogError("Сервер не найден!");
-						return false;
-					}
-					else
-					{ 
-						_networkScheduler.TryConnect(address);
-					}
-
-					return true;
-				}
-			}
-			catch
-			{
-				Debug.LogError("Сервер не найден!");
-				return false;
-			}
-		}
+			=> AuthService.TryConnect(ip, port);
+		
 
 		private void OnEvent(object sender, ResponseData responseData)
 		{
 			if(RPEProtocol.TryParse(responseData.Data, out RPECommandData rpeCom))
 			{
-				switch(rpeCom)
-				{
-					case RPECommandData.Subsribe:
-						if(_networkScheduler.TryConnect(responseData.EndPoint))
-						{
-							if(_isDebug)
-							{
-								Debug.Log($"{responseData.EndPoint} - connected");
-							}
-						}
-						var startProto = new RPEProtocol(RPECommandData.Start);
-						startProto.SendTo((UpdInstance)_updInstance, responseData.EndPoint);
-
-						break;
-					case RPECommandData.Exit:
-						if(_networkScheduler.TryDisconnect(responseData.EndPoint))
-						{
-							if(_isDebug)
-							{
-								Debug.Log($"{responseData.EndPoint} - disconnected");
-							}
-						}
-						break;
-					case RPECommandData.Start:
-						_isConnections = true;
-						break;
-					default:
-						Debug.Log(rpeCom);
-						break;
-				}
+				AuthService.CallResponse(responseData, rpeCom, _isDebug);
 			}
 			else if(SyncProtocol.TryParse(responseData.Data, out ISyncData syncData))
 			{

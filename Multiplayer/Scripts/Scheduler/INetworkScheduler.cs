@@ -10,21 +10,22 @@ namespace Assets.Multiplayer.Scheduler
 	/// <summary>Сетевой планировщик.</summary>
 	public interface INetworkScheduler : IDisposable
 	{
-        public bool IsServer { get; set; }
+		public bool IsServer { get; set; }
 
-        /// <summary>Возвращает все разрешённые данные.</summary>
-        /// <returns></returns>
-        public IEnumerable<IPageData<FieldData>> GetAllowFields();
+		/// <summary>Возвращает все разрешённые данные.</summary>
+		/// <returns></returns>
+		public IEnumerable<IPageData<FieldData>> GetAllowFields();
 
 		/// <summary>Вызывает изменения в планировщике.</summary>
 		//public void Post(Func<byte[]> func, FieldData field, EndPoint endPoint);
 
-        public void Post(byte[] data);
+		public void Post(byte[] data);
 
-        public void Post(QueueItemNet queueItemNet);
+		public void Post(QueueItemNet queueItemNet);
 
+		public void Call(Action action);
 
-        public void Resolve();
+		public void Resolve();
 
 		public bool Check(EndPoint endPoint);
 

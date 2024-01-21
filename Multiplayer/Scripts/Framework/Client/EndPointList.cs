@@ -5,36 +5,36 @@ using System.Net;
 
 namespace UdpServerCore.Framework.ClientList
 {
-    public sealed class EndPointList : IIPEndPointClient
-    {
-        public List<EndPoint> EndPoints { get; }
+	public sealed class EndPointList : IIPEndPointClient
+	{
+		public List<EndPoint> EndPoints { get; }
 
-        public UserTableRule userTableRule { get; }
+		public UserTableRule userTableRule { get; }
 
-        public EndPointList()
-        {
-            EndPoints = new List<EndPoint>();
-            userTableRule = new UserTableRule();
-        }
+		public EndPointList()
+		{
+			EndPoints = new List<EndPoint>();
+			userTableRule = new UserTableRule();
+		}
 
-        public void AddConnect(EndPoint endPoint)
-        {
-            EndPoints.Add(endPoint);
-        }
+		public void AddConnect(EndPoint endPoint)
+		{
+			EndPoints.Add(endPoint);
+		}
 
-        public void Disconnect(EndPoint endPoint)
-        {
-            EndPoints.Remove(endPoint);
-        }
+		public void Disconnect(EndPoint endPoint)
+		{
+			EndPoints.Remove(endPoint);
+		}
 
-        public EndPoint[] GetEndPoint(EndPoint endPoint)
-        {
-            return EndPoints.Where(x => x != endPoint).ToArray();
-        }
+		public EndPoint[] GetEndPoint(EndPoint endPoint)
+		{
+			return EndPoints.Where(x => x != endPoint).ToArray();
+		}
 
-        public bool Check(EndPoint endPoint)
-        {
-            return EndPoints.Contains(endPoint);
-        }
-    }
+		public bool Check(EndPoint endPoint)
+		{
+			return EndPoints.Contains(endPoint);
+		}
+	}
 }
